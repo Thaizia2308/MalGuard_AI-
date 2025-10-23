@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MalGuard AI — URL Safety Check</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="container">
+    <h1 class="title">MalGuard AI</h1>
+    <p class="subtitle">Advanced AI-powered URL threat detection</p>
+
+    <div class="input-box">
+      <input id="urlInput" type="text" placeholder="https://example.com" />
+      <button id="checkBtn">🔍 Check URL</button>
+    </div>
+
+    <div id="result" class="result-box"></div>
+  </main>
+
+  <footer>
+    <p>© 2025 MalGuard AI | Securing the Web with Intelligence 🛡️</p>
+  </footer>
+
+<script>
+document.getElementById('checkBtn').onclick = async () => {
+  const url = document.getElementById('urlInput').value;
+  const result = document.getElementById('result');
+  result.innerHTML = "⏳ Analyzing...";
+  result.className = "result-box loading";
+
+  const res = await fetch('/api/check', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ url })
+  });
+
+  const data = await res.json();
+  if (data.error) {
+    result.innerHTML = `⚠️ ${data.error}`;
+    result.className = "result-box error";
+    return;
+  }
+
+  const prob = (data.malicious_probability * 100).toFixed(1);
+  if (data.label === 1) {
+    result.innerHTML = `
+      <h3>🚨 Malicious URL</h3>
+      <p><strong>Confidence:</strong> ${prob}%</p>
+      <p>This site may contain phishing or malware content.</p>
+    `;
+    result.className = "result-box malicious";
+  } else {
+    result.innerHTML = `
+      <h3>✅ Safe URL</h3>
+      <p><strong>Confidence:</strong> ${prob}%</p>
+      <p>This link appears to be safe and trustworthy.</p>
+    `;
+    result.className = "result-box safe";
+  }
+};
+</script>
+</body>
+</html>
